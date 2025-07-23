@@ -20,26 +20,83 @@ class Hash {
 
   set(key, value) {
     const hash = this.hash(key);
+
+    // If that index is empty initialize a LL
     if (this.map[hash] == null) {
-      this.map[hash] = value;
+      const ll = new LinkedList();
+      const node = new Node(key, value);
+      ll.append(node);
+      this.map[hash] = ll;
       return;
     }
-    const ll = new LinkedList();
-    const node_prev = new Node(this.map[hash]);
-    const node_new = new Node(value);
-    ll.append(node_prev);
-    ll.append(node_new);
+
+    // If it is a LL then append a node to it
+    if (this.map[hash] instanceof LinkedList) {
+      const ll = this.map[hash];
+      const node = new Node(key, value);
+      ll.append(node);
+
+      // Write to the previous values is keys are identical
+      let cur = this.map[hash].head;
+      while (cur != null) {
+        if (cur.key === key) {
+          cur.value = value;
+          return;
+        }
+        cur = cur.next;
+      }
+      return;
+    }
+    console.log('Reached end in hash.set()');
   }
 
-  get(key) {}
+  get(key) {
+    const hash = this.hash(key);
+    if (this.map[hash] == null) return null;
+    const ll = this.map[hash];
+    cur = ll.head;
 
-  has(key) {}
+    while (cur != null) {
+      if (cur.key === key) {
+        return cur.value;
+      }
+    }
+    return null;
+  }
 
-  remove(key) {}
+  has(key) {
+    const hash = this.hash(key);
+
+    if (this.map[hash] == null) return false;
+
+    const ll = this.map[hash];
+    cur = ll.head;
+    while (cur != null) {
+      if (cur.key === key) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  remove(key) {
+    const hash = this.hash(key);
+
+    if (this.map[hash] == null) return false;
+
+    const ll = this.map[hash];
+    if (ll.contains_key(key)) {
+      const i = ll.find_key(key);
+      ll.removeAt(i);
+    }
+    return true;
+  }
 
   length() {}
 
-  clear() {}
+  clear() {
+    this.map = [];
+  }
 
   keys() {}
 
@@ -132,7 +189,7 @@ class LinkedList {
     this.tail = cur;
   }
 
-  contains(value) {
+  contains_value(value) {
     let cur = this.head;
     while (cur != null) {
       if (cur.value == value) {
@@ -143,11 +200,35 @@ class LinkedList {
     return false;
   }
 
-  find(value) {
+  contains_key(key) {
+    let cur = this.head;
+    while (cur != null) {
+      if (cur.key == key) {
+        return true;
+      }
+      cur = cur.next;
+    }
+    return false;
+  }
+
+  find_value(value) {
     let n = 0;
     let cur = this.head;
     while (cur != null) {
       if (cur.value == value) {
+        return n;
+      }
+      cur = cur.next;
+      n++;
+    }
+    return null;
+  }
+
+  find_key(key) {
+    let n = 0;
+    let cur = this.head;
+    while (cur != null) {
+      if (cur.key == key) {
         return n;
       }
       cur = cur.next;
@@ -203,7 +284,8 @@ class LinkedList {
 }
 
 class Node {
-  constructor(value) {
+  constructor(key, value) {
+    this.key = key;
     this.value = value;
     this.next = null;
   }
