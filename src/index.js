@@ -5,6 +5,9 @@ class Hash {
     this.load_factor = load_factor;
     this.capacity = capacity;
     this.map = [];
+    for (let i = 0; i < capacity; i++) {
+      this.map.push(null);
+    }
   }
 
   hash(key) {
@@ -33,8 +36,6 @@ class Hash {
     // If it is a LL then append a node to it
     if (this.map[hash] instanceof LinkedList) {
       const ll = this.map[hash];
-      const node = new Node(key, value);
-      ll.append(node);
 
       // Write to the previous values is keys are identical
       let cur = this.map[hash].head;
@@ -45,6 +46,8 @@ class Hash {
         }
         cur = cur.next;
       }
+      const node = new Node(key, value);
+      ll.append(node);
       return;
     }
     console.log('Reached end in hash.set()');
@@ -92,17 +95,81 @@ class Hash {
     return true;
   }
 
-  length() {}
+  length() {
+    let count = 0;
+    for (let i = 0; i < this.capacity; i++) {
+      if (this.map[i] instanceof LinkedList) {
+        count += this.map[i].size();
+      }
+    }
+    return count;
+  }
 
   clear() {
     this.map = [];
+    for (let i = 0; i < this.capacity; i++) {
+      this.map.push(null);
+    }
   }
 
-  keys() {}
+  keys() {
+    let keys = [];
+    for (let i = 0; i < this.capacity; i++) {
+      if (this.map[i] instanceof LinkedList) {
+        let cur = this.map[i].head;
+        while (cur != null) {
+          keys.push(cur.key);
+          cur = cur.next;
+        }
+      }
+    }
+    return keys;
+  }
 
-  values() {}
+  values() {
+    let values = [];
+    for (let i = 0; i < this.capacity; i++) {
+      if (this.map[i] instanceof LinkedList) {
+        let cur = this.map[i].head;
+        while (cur != null) {
+          values.push(cur.value);
+          cur = cur.next;
+        }
+      }
+    }
+    return values;
+  }
 
-  entries() {}
+  entries() {
+    let entries = [];
+    const keys = this.keys();
+    const values = this.values();
+    for (let i = 0; i < values.length; i++) {
+      let entry = [keys[i], values[i]];
+      entries.push(entry);
+    }
+    return entries;
+  }
+
+  print() {
+    for (let i = 0; i < this.map.length; i++) {
+      const bucket = this.map[i];
+      if (bucket == null) {
+        console.log(`${i}: null`);
+      } else if (bucket instanceof LinkedList) {
+        let str = '';
+        let cur = bucket.head;
+        while (cur != null) {
+          str += `[${JSON.stringify(cur.key)}: ${JSON.stringify(cur.value)}] -> `;
+          cur = cur.next;
+        }
+        str += 'null';
+        console.log(`${i}: ${str}`);
+      } else {
+        console.log(`${i}: [Single Value] ${bucket}`);
+      }
+    }
+  }
 }
 
 class LinkedList {
@@ -290,3 +357,24 @@ class Node {
     this.next = null;
   }
 }
+
+const test = new Hash(0.8, 16); // or HashMap() if using a factory
+
+test.set('apple', 'red');
+test.set('banana', 'yellow');
+test.set('carrot', 'orange');
+test.set('dog', 'brown');
+test.set('elephant', 'gray');
+test.set('frog', 'green');
+test.set('grape', 'purple');
+test.set('hat', 'black');
+test.set('ice cream', 'white');
+test.set('jacket', 'blue');
+test.set('kite', 'pink');
+test.set('lion', 'golden');
+
+console.log(test.print());
+
+test.clear();
+console.log(test);
+console.log(test.entries());
